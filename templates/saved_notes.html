@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Saved Notes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    .navbar {
+      background-color: #0066cc;
+      color: white;
+      padding: 10px;
+    }
+
+    .navbar a {
+      color: white;
+      margin-right: 15px;
+      text-decoration: none;
+    }
+
+    .navbar a:hover {
+      text-decoration: underline;
+    }
+
+    .search-bar {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+
+    .search-bar input[type="text"] {
+      padding: 4px;
+      width: 140px;
+      font-size: 12px;
+    }
+
+    .search-bar button {
+      padding: 4px 8px;
+      font-size: 12px;
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .search-bar button:hover {
+      background-color: #004a99;
+    }
+
+    .notes-container {
+      max-height: 400px;
+      overflow-y: scroll;
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-top: 60px;
+    }
+
+    .note {
+      margin-bottom: 15px;
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .note h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .note p {
+      font-size: 14px;
+    }
+
+    .note a {
+      text-decoration: none;
+      color: #0066cc;
+    }
+
+    .note a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <a href="{% url 'your_notes' %}">Your Notes</a>
+    <a href="{% url 'saved_notes' %}">Saved Notes</a>
+  </div>
+
+  <!-- Search bar -->
+  <form method="get" class="search-bar">
+    <input type="text" name="q" placeholder="Search notes by title..." value="{{ request.GET.q }}">
+    <button type="submit">Search</button>
+  </form>
+
+  <h2>All saved notes</h2>
+  <hr>
+
+  <div class="notes-container">
+    {% for note in notes %}
+      <div class="note">
+        <h2>{{ note.title }}</h2>
+        <p>{{ note.content }}</p>
+        <a href="{% url 'edit_note' note.id %}">Edit</a> |
+        <a href="{% url 'delete_note' note.id %}?next={% url 'saved_notes' %}">Delete</a>
+      </div>
+    {% empty %}
+      <p>No notes found.</p>
+    {% endfor %}
+  </div>
+
+</body>
+</html>
+

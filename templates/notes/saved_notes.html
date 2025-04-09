@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Saved Notes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    .navbar {
+      background-color: #0066cc;
+      color: white;
+      padding: 10px;
+    }
+
+    .navbar a {
+      color: white;
+      margin-right: 15px;
+      text-decoration: none;
+    }
+
+    .navbar a:hover {
+      text-decoration: underline;
+    }
+
+    .search-bar {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+
+    .search-bar input[type="text"] {
+      padding: 4px;
+      width: 140px;
+      font-size: 12px;
+    }
+
+    .search-bar button {
+      padding: 4px 8px;
+      font-size: 12px;
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .search-bar button:hover {
+      background-color: #004a99;
+    }
+
+    .notes-container {
+      max-height: 400px;
+      overflow-y: scroll;
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-top: 20px;
+    }
+
+    .note {
+      margin-bottom: 15px;
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .note h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .note p {
+      font-size: 14px;
+    }
+
+    .note a {
+      text-decoration: none;
+      color: #0066cc;
+    }
+
+    .note a:hover {
+      text-decoration: underline;
+    }
+
+    /* Styling for the back button */
+    .back-button {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      padding: 10px 20px;
+      background-color: #ff4d4d; /* Red color */
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      text-decoration: none;
+    }
+
+    .back-button:hover {
+      background-color: #e60000;
+    }
+
+    /* Sorting dropdown */
+    .sort-dropdown {
+      margin-top: 20px;
+      padding: 5px;
+      background-color: #fff;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .sort-dropdown label {
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <a href="{% url 'your_notes' %}">Your Notes</a>
+    <a href="{% url 'saved_notes' %}">Saved Notes</a>
+    <a href="{% url 'logout' %}">Logout</a>
+  </div>
+
+  <!-- Search bar -->
+  <form method="get" class="search-bar">
+    <input type="text" name="q" placeholder="Search notes by title..." value="{{ request.GET.q }}">
+    <button type="submit">Search</button>
+  </form>
+
+  <h2>All saved notes</h2>
+  <hr>
+
+  <!-- Sort Dropdown (Positioned below the "All Saved Notes" text) -->
+  <div class="sort-dropdown">
+    <label for="sort">Sort By:</label>
+    <select id="sort" onchange="window.location.href=this.value;">
+      <option value="?sort=recent" {% if request.GET.sort == 'recent' %}selected{% endif %}>Most Recent</option>
+      <option value="?sort=last_written" {% if request.GET.sort == 'last_written' %}selected{% endif %}>Last Written</option>
+    </select>
+  </div>
+
+  <div class="notes-container">
+    {% for note in notes %}
+      <div class="note">
+        <h2>{{ note.title }}</h2>
+        <p>{{ note.content }}</p>
+        <a href="{% url 'edit_note' note.id %}">Edit</a> |
+        <a href="{% url 'delete_note' note.id %}">Delete</a>
+      </div>
+    {% empty %}
+      <p>No notes found.</p>
+    {% endfor %}
+  </div>
+
+  <!-- Back Button to Your Notes -->
+  <a href="{% url 'your_notes' %}" class="back-button">Back to Your Notes</a>
+
+</body>
+</html>
+
+
+
+
+
+

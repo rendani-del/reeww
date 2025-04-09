@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Your Notes</title>
+  <style>
+    /* Original styling remains mostly untouched */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .navbar {
+      background-color: #0066cc;
+      color: white;
+      padding: 15px 30px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-right: 50px;
+    }
+
+    .navbar a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-size: 18px;
+    }
+
+    .navbar a:hover {
+      text-decoration: underline;
+    }
+
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #fff;
+      min-width: 250px;
+      max-width: 300px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+      padding: 10px;
+      z-index: 1;
+      color: #333;
+      border-radius: 6px;
+      right: 0;
+      transform: translateX(-30%);
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+
+    .dropdown-content input,
+    .dropdown-content button {
+      width: 100%;
+      margin-top: 8px;
+      padding: 8px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .dropdown-content button {
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .dropdown-content button:hover {
+      background-color: #004a99;
+    }
+
+    .dropdown-content p {
+      font-size: 14px;
+      margin: 10px 0;
+    }
+
+    h1 {
+      font-size: 32px;
+      color: #333;
+      margin-top: 30px;
+    }
+
+    .form-container {
+      background-color: white;
+      border-radius: 8px;
+      padding: 40px;
+      max-width: 800px;
+      width: 100%;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    input[type="text"], textarea {
+      padding: 15px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      width: 100%;
+      box-sizing: border-box;
+      background-color: #f9f9f9;
+    }
+
+    textarea {
+      height: 200px;
+    }
+
+    .save-button {
+      padding: 12px 20px;
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      width: 100%;
+      transition: background-color 0.3s ease;
+    }
+
+    .save-button:hover {
+      background-color: #004a99;
+    }
+
+    .cancel-link {
+      text-align: center;
+      margin-top: 20px;
+      text-decoration: none;
+      color: #007BFF;
+    }
+
+    .back-button {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      padding: 10px 20px;
+      background-color: #ff4d4d;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .event-entry {
+      border-bottom: 1px solid #ddd;
+      padding: 6px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
+
+    .event-entry span {
+      flex-grow: 1;
+    }
+
+    .event-entry div {
+      display: flex;
+      gap: 5px;
+    }
+
+    .delete-btn {
+      padding: 4px 8px;
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .delete-btn:hover {
+      background-color: #c0392b;
+    }
+
+    .edit-btn {
+      padding: 4px 8px;
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .edit-btn:hover {
+      background-color: #1e8449;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <div>
+      <a href="{% url 'your_notes' %}">Your Notes</a>
+      <a href="{% url 'saved_notes' %}">Saved Notes</a>
+      <a href="{% url 'logout' %}">Logout</a>
+    </div>
+
+    <div class="dropdown">
+      <span style="cursor:pointer;">📅 Upcoming Events ▼</span>
+      <div class="dropdown-content" id="schedule-dropdown">
+        <label for="event-date">Select Date:</label>
+        <input type="date" id="event-date">
+        <input type="text" id="event-description" placeholder="What’s the event?">
+        <button onclick="saveEvent()">Save Event</button>
+        <hr>
+        <div id="upcoming-events">
+          <p>No upcoming events.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1>Create a Note</h1>
+
+    <div class="form-container">
+      <form method="post" id="create-note-form" enctype="multipart/form-data" onsubmit="changeButtonColor()">
+        {% csrf_token %}
+        <input type="text" name="title" placeholder="Note Title" required>
+        <textarea name="content" placeholder="Write your note here..." required></textarea>
+        <button type="submit" class="save-button" id="save-button">Save Note</button>
+        <a href="{% url 'your_notes' %}" class="cancel-link">Cancel</a>
+      </form>
+    </div>
+  </div>
+
+  <a href="{% url 'home' %}" class="back-button">Back to login</a>
+
+  <script>
+    let events = [];
+    let editIndex = -1;
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const storedEvents = localStorage.getItem('events');
+      if (storedEvents) {
+        events = JSON.parse(storedEvents);
+      }
+      displayEvents();
+    });
+
+    function changeButtonColor() {
+      document.getElementById('save-button').classList.remove('save-button');
+      document.getElementById('save-button').classList.add('saved-button');
+      setTimeout(function () {
+        window.location.href = "{% url 'saved_notes' %}";
+      }, 1000);
+    }
+
+    function saveEvent() {
+      const date = document.getElementById('event-date').value;
+      const description = document.getElementById('event-description').value.trim();
+
+      if (!date || !description) {
+        alert("Please select a date and enter an event.");
+        return;
+      }
+
+      if (editIndex > -1) {
+        events[editIndex] = { date, description };
+        editIndex = -1;
+      } else {
+        events.push({ date, description });
+      }
+
+      events.sort((a, b) => new Date(a.date) - new Date(b.date));
+      localStorage.setItem('events', JSON.stringify(events));
+
+      displayEvents();
+
+      document.getElementById('event-date').value = '';
+      document.getElementById('event-description').value = '';
+    }
+
+    function deleteEvent(index) {
+      events.splice(index, 1);
+      localStorage.setItem('events', JSON.stringify(events));
+      displayEvents();
+    }
+
+    function editEvent(index) {
+      const event = events[index];
+      document.getElementById('event-date').value = event.date;
+      document.getElementById('event-description').value = event.description;
+      editIndex = index;
+    }
+
+    function displayEvents() {
+      const container = document.getElementById('upcoming-events');
+      container.innerHTML = '';
+
+      if (events.length === 0) {
+        container.innerHTML = '<p>No upcoming events.</p>';
+        return;
+      }
+
+      events.forEach((event, index) => {
+        const div = document.createElement('div');
+        div.className = 'event-entry';
+        div.innerHTML = `
+          <span>📌 ${event.date}: ${event.description}</span>
+          <div>
+            <button class="edit-btn" onclick="editEvent(${index})">Edit</button>
+            <button class="delete-btn" onclick="deleteEvent(${index})">Delete</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+  </script>
+
+</body>
+</html>
+

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login / Signup</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f1f9ff;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background-color: #ffffff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #0066cc;
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    button {
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      font-size: 14px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"] {
+      background-color: #f5faff;
+    }
+
+    button {
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #004c99;
+    }
+
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+
+    .error {
+      color: red;
+      text-align: center;
+    }
+
+    .success {
+      color: green;
+      text-align: center;
+    }
+
+    .signup-link {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    .signup-link a {
+      color: #0066cc;
+      text-decoration: none;
+    }
+
+    .signup-link a:hover {
+      text-decoration: underline;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .errorlist {
+      color: red;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      font-size: 12px;
+    }
+
+    .field-error {
+      color: red;
+      font-size: 12px;
+      margin-top: 5px;
+      display: none;
+    }
+
+    input.invalid {
+      border-color: red;
+    }
+  </style>
+
+  <script>
+    function toggleForm(form) {
+      if (form === 'login') {
+        document.getElementById('signup-form').style.display = 'none';
+        document.getElementById('login-form').style.display = 'block';
+      } else {
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('signup-form').style.display = 'block';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      // Signup form validation
+      const signupForm = document.getElementById('signup-form').querySelector('form');
+      if (signupForm) {
+        const signupBtn = signupForm.querySelector('button[type="submit"]');
+        const inputs = signupForm.querySelectorAll('input');
+
+        inputs.forEach(input => {
+          input.addEventListener('input', validateSignupForm);
+        });
+
+        function validateSignupForm() {
+          let formIsValid = true;
+          const username = signupForm.querySelector('#id_username');
+          const email = signupForm.querySelector('#id_email');
+          const password1 = signupForm.querySelector('#id_password1');
+          const password2 = signupForm.querySelector('#id_password2');
+
+          if (username) {
+            const usernameError = document.getElementById('id_username-error') || createErrorElement(username, 'id_username-error');
+            if (!/^[a-zA-Z0-9_]{4,30}$/.test(username.value)) {
+              showError(username, usernameError, 'Username must be 4-30 characters (letters, numbers, _ only)');
+              formIsValid = false;
+            } else {
+              hideError(username, usernameError);
+            }
+          }
+
+          if (email) {
+            const emailError = document.getElementById('id_email-error') || createErrorElement(email, 'id_email-error');
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+              showError(email, emailError, 'Please enter a valid email address');
+              formIsValid = false;
+            } else {
+              hideError(email, emailError);
+            }
+          }
+
+          if (password1) {
+            const passwordError = document.getElementById('id_password1-error') || createErrorElement(password1, 'id_password1-error');
+            if (password1.value.length < 6) {
+              showError(password1, passwordError, 'Password must be at least 6 characters');
+              formIsValid = false;
+            } else {
+              hideError(password1, passwordError);
+            }
+          }
+
+          if (password1 && password2) {
+            const password2Error = document.getElementById('id_password2-error') || createErrorElement(password2, 'id_password2-error');
+            if (password1.value !== password2.value) {
+              showError(password2, password2Error, 'Passwords do not match');
+              formIsValid = false;
+            } else {
+              hideError(password2, password2Error);
+            }
+          }
+
+          if (signupBtn) {
+            signupBtn.disabled = !formIsValid;
+          }
+        }
+
+        function createErrorElement(input, id) {
+          const errorElement = document.createElement('div');
+          errorElement.id = id;
+          errorElement.className = 'field-error';
+          input.parentNode.appendChild(errorElement);
+          return errorElement;
+        }
+
+        function showError(input, errorElement, message) {
+          input.classList.add('invalid');
+          errorElement.textContent = message;
+          errorElement.style.display = 'block';
+        }
+
+        function hideError(input, errorElement) {
+          input.classList.remove('invalid');
+          errorElement.style.display = 'none';
+        }
+
+        validateSignupForm();
+      }
+
+      // Show success message if redirected from successful signup
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('signup_success')) {
+        toggleForm('login');
+        const successMessage = document.createElement('div');
+        successMessage.className = 'success';
+        successMessage.textContent = 'Signup successful! Please login with your credentials.';
+        const loginForm = document.getElementById('login-form');
+        loginForm.insertBefore(successMessage, loginForm.firstChild.nextSibling);
+      }
+    });
+  </script>
+</head>
+<body>
+  <div class="container">
+    <!-- Signup Form -->
+    <div id="signup-form" style="display: none;">
+      <h2>Signup</h2>
+      {% if signup_form.errors %}
+        <p class="error">Please correct the errors below.</p>
+      {% endif %}
+      <form method="post" action="{% url 'signup' %}">
+        {% csrf_token %}
+        {% for field in signup_form %}
+          <div class="form-group">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.errors %}
+              <ul class="errorlist">
+                {% for error in field.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+            <div id="{{ field.auto_id }}-error" class="field-error"></div>
+          </div>
+        {% endfor %}
+        <button type="submit" name="signup" disabled>Sign up</button>
+      </form>
+      <div class="signup-link">
+        <p>Already have an account? <a href="javascript:void(0);" onclick="toggleForm('login')">Login</a></p>
+      </div>
+    </div>
+
+    <!-- Login Form -->
+    <div id="login-form" style="display: block;">
+      <h2>Login</h2>
+      {% if login_error %}
+        <p class="error">{{ login_error }}</p>
+      {% endif %}
+      <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        {% for field in login_form %}
+          <div class="form-group">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.errors %}
+              <ul class="errorlist">
+                {% for error in field.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        {% endfor %}
+        <button type="submit" name="login">Login</button>
+      </form>
+      <div class="signup-link">
+        <p>Don't have an account? <a href="javascript:void(0);" onclick="toggleForm('signup')">Sign up</a></p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
